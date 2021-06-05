@@ -1,0 +1,29 @@
+<!-- form.html -->
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block body %}
+
+    {% if not request.session.session_key %}
+        <h1 class="text-center">
+            <!-- "request.path"에는 request를 한 경로가 들어있다. (Ex. /accounts/login)
+            이걸 if문으로 제어할 수 있음. -->
+            {% if "signup" in request.path %}
+            회원가입
+            {% else %}
+            로그인
+            {% endif %}
+        </h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- 부트스트랩을 form에 입히는 과정 -->
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">가입</button>
+        </form>
+    {% else %}
+        <h1>이미 로그인이 되어있네.</h1>
+    {% endif %}
+{% endblock %}
