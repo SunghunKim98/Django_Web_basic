@@ -21,7 +21,12 @@
 
             <!-- 부트스트랩을 form에 입히는 과정 -->
             {% bootstrap_form form %}
+            {% if "signup" in request.path %}
             <button type="submit" class="btn btn-primary">가입</button>
+            {% else %}
+            <p>if you don't have any account, <a href="{% url 'accounts:signup' %}">Join</a></p>
+            <button type="submit" class="btn btn-primary">로그인</button>
+            {% endif %}
         </form>
     {% else %}
         <h1>이미 로그인이 되어있네.</h1>

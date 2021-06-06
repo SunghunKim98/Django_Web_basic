@@ -26,7 +26,8 @@ def signup(request): # urls.py에 views.signup이 이 함수를 가리킨다.
 	# 이미 로그인이 된 상태면 홈으로 보낸다.
 	if request.user.is_authenticated:
 		# return redirect("posts:index")
-		return render(request, "posts/main.html", {'user': str(request.session['user'])})
+		# return render(request, "posts/main.html", {'user': request.session['user']})
+		return redirect('posts:index')
 
 	if request.method == 'POST':
 		form = CustomUserCreationForm(request.POST)
@@ -37,15 +38,17 @@ def signup(request): # urls.py에 views.signup이 이 함수를 가리킨다.
 			# print(request.path)
 			user_login(request, user) # 유저 정보를 이용해 로그인한다. 이때 sessionid가 주어진다.
 			# print(user) -> user name이 return 된다.
-			request.session['user'] = user # session을 통해 user_name이라는 key에 user를 저장
-			# return redirect('posts:index')
-			return render(request, "posts/main.html", {'user': str(request.session['user'])})
+			request.session['user'] = user.username # session을 통해 user_name이라는 key에 user를 저장
+			# print(type(user)) == <class 'django.contrib.auth.models.User'>
+			# print(user.username) == username
+			# return render(request, "posts/main.html", {'user': request.session['user']})
+			return redirect('posts:index')
 		print("Fail to register")
 		return redirect('accounts:signup')
 		# redirect 시 urls.py의 <app_name>:<name>으로 요청을 보낸다.
 	else:
 		form = CustomUserCreationForm() # 비어있는 회원가입 폼을 생성한다.
-		return render(request, 'accounts/form.html', {'form': form, 'user': ''})
+		return render(request, 'accounts/form.html', {'form': form})
 		# forms.html 파일을 렌더한다. 이때 위에서 생성한 회원가입 폼을 'form'이라는 이름으로 함께 보낸다.(딕셔너리)
 
 
@@ -53,7 +56,8 @@ def login(request):
 	# 이미 로그인이 된 상태면 홈으로 보낸다.
 	if request.user.is_authenticated:
 		# return redirect("posts:index")
-		return render(request, "posts/main.html", {'user': str(request.session['user'])})
+		# return render(request, "posts/main.html", {'user': str(request.session['user'])})
+		return redirect('posts:index')
 
 	if request.method == 'POST':
 		form = AuthenticationForm(request, request.POST)
@@ -68,7 +72,10 @@ def login(request):
 			request.session['user'] = str(form.get_user()) # session을 통해 user_name이라는 key에 user를 저장
 
 			# return redirect('posts:index') # posts라는 App의 index 페이지로 이동.
-			return render(request, "posts/main.html", {'user': str(request.session['user'])})
+#			return render(request, "posts/main.html", {'user': str(request.session['user'])})
+
+			return redirect('posts:index')
+
 		return redirect('accounts:login') # accounts라는 App의 login 페이지로 이동.
 	else:
 		form = AuthenticationForm()
@@ -81,7 +88,8 @@ def logout(request):
 
 	# print(str(request.session['user'])) # -> 걍 KeyError에러가 남.
 
-	return render(request, "posts/main.html", {'user': ''})
+	# return render(request, "posts/main.html", {'user': ''})
+	return redirect('posts:index')
 
 def show_profile(request):
 	person = get_object_or_404(get_user_model(), username=request.user)
