@@ -12,6 +12,8 @@ from .models import Comment
 from .forms import CommentForm
 
 
+from django.core.paginator import Paginator
+
 # def index(request):
 #     template_name = "posts/main.html"
 
@@ -43,11 +45,23 @@ def index(request):
     # Post 모델을 기반으로 생성된 테이블의 모든 데이터를 가져온다.
     form = CommentForm()
 
-    print(type(request.user))
+    page = request.GET.get('page', '1')
+    print(page)
+    paginator = Paginator(posts, 10)
+    # page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(page)
 
-   # print(request.user)
+    print(page_obj)
+    print(page_obj.paginator.count)
+    print(page_obj.number)
+    print("---")
+    print(type(page_obj))
 
-    return render(request, 'posts/index.html', {'posts': posts, 'form': form})
+    # for i in page_obj:
+    #     print(type(i)) -> 여기 i에 <class 'posts.models.Post'>가 들어있네.
+    #     print(i)
+
+    return render(request, 'posts/index.html', {'posts': posts, 'form': form, 'page': page, 'page_list': page_obj})
 
 def create_post(request):
     if request.method == 'POST':
@@ -62,6 +76,11 @@ def create_post(request):
             print(type(request.user))
             post.user = request.user
             post.save()
+
+            print(post.id)
+            print(post)
+            # print(post.post_id)
+
             return redirect('posts:index')
         return redirect('posts:create_post')
     else:
@@ -118,11 +137,28 @@ def create_comment(request, post_id):
         # print(f"typeof comment: {type(comment)}")
         # print(f"comment: {comment}")
 
-    return redirect('posts:index')
+    return redirect('posts:specific_page', post_id) # @@@ 이게 이렇게 된다!!
+#    return redirect('posts:specific_page')
 
 @login_required
 def delete_comment(request, post_id, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if request.user == comment.user:
         comment.delete()
-    return redirect('posts:index')
+    return redirect('posts:specific_page', post_id)
+
+@login_required
+def specific_page(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    form = CommentForm()
+
+    print(type(post))
+    print(post)
+
+    template_name = "posts/specific.html"
+    context = {
+        'post': post,
+        'form': form
+    }
+
+    return render(request, template_name, context)

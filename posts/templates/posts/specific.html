@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block body %}
+
+{% if request.user.is_authenticated %}
+<div class="">
+
+	<div class="">
+        {% if post.image %}
+        <img src="{{ post.image.url }}" class="card-img-top" alt="...">
+        {% endif %}
+        <div class="">
+		<h1>{{ post.subject }}</h1>
+        <p class="">{{ post.content }}</p>
+		</div>
+		{% if post.user == user %}
+		<!-- 수정, 삭제 -->
+		<a href="{% url 'posts:edit_post' post.id %}"><button>수정</button></a>
+		<form action="{% url 'posts:delete_post' post.id %}" method="POST">
+			{% csrf_token %}
+			<button type="submit">삭제</button>
+		</form>
+		{% endif %}
+
+		<!-- 댓글 등록 -->
+		{% if user.is_authenticated %}
+		<form action="{% url 'posts:create_comment' post.id %}" method="POST">
+			{% csrf_token %}
+			{% bootstrap_form form %}
+			<button type="submit"> 등록</button>
+		</form>
+		{% endif %}
+
+		<!-- 댓글 출력 -->
+		{% if post.comments.all %}
+		<ul>
+			{% for comment in post.comments.all %}
+			<li>
+				<p><strong>{{ comment.user.username }}</strong> - {{ comment.created }}</p>
+
+				<p>{{ comment.content }}
+					{% if user == comment.user %}
+					<a href="{% url 'posts:delete_comment' post.id comment.id %}">
+						[삭제]
+					</a>
+					{% endif %}
+				</p>
+			</li>
+			{% endfor %}
+		</ul>
+
+		{% else %}
+
+		<h1>없어 C8</h1>
+
+		{% endif %}
+
+
+	</div>
+
+</div>
+{% else %}
+
+<div>로그인 먼저 해 임마.</div>
+<a href="{% url 'accounts:login' %}">Login page</a>
+
+{% endif %}
+
+{% endblock %}
